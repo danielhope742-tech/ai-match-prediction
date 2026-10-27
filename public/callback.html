@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deriv Login</title>
+  <style>
+    body {
+      background: #101827;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px 16px;
+    }
+    .panel {
+      max-width: 420px;
+      margin: auto;
+      padding: 24px;
+      background: #1e293b;
+      border-radius: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h2>Deriv Account Connection</h2>
+    <p id="status">Checking your login response...</p>
+  </div>
+
+  <script>
+    const status = document.getElementById("status");
+    const params = new URLSearchParams(location.search);
+    const code = params.get("code");
+    const returnedState = params.get("state");
+    const savedState = sessionStorage.getItem("deriv_oauth_state");
+    const verifier = sessionStorage.getItem("deriv_pkce_verifier");
+
+    if (params.has("error")) {
+      status.textContent =
+        "Login cancelled or rejected: " + params.get("error");
+    } else if (!code || !returnedState ||
+               returnedState !== savedState || !verifier) {
+      status.textContent =
+        "Login could not be verified. Return to the analysis tool and try again.";
+    } else {
+      status.textContent =
+        "Login response received. Preparing secure verification...";
+
+      fetch("/api/oauth-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: code,
+          verifier: verifier,
+          redirectUri:
+            "https://ai-match-prediction.netlify.app/callback.html"
+        })
+      })
+      .then(async response => {
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || "Verification failed.");
+        }
+        sessionStorage.removeItem("deriv_pkce_verifier");
+        sessionStorage.removeItem("deriv_oauth_state");
+        status.textContent =
+          "Deriv login verification succeeded. You can return to your analysis tool.";
+      })
+      .catch(error => {
+        status.textContent =
+          "Verification is not ready yet. " + error.message;
+      });
+    }
+  </script>
+</body>
+</html>
