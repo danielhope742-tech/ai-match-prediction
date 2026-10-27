@@ -184,7 +184,10 @@ export function Dashboard() {
     setTicks([])
     setDecimals(currentMarket.decimals)
     const ws = new WebSocket(
-      `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(appId)}`,
+  `wss://ws.binaryws.com/websockets/v3?app_id=${encodeURIComponent(appId)}`,
+)
+    
+                                            
     )
     socket.current = ws
     let precision = currentMarket.decimals
