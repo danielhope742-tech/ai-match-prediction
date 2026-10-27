@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connect Deriv Demo</title>
+</head>
+<body style="background:#101827;color:white;font-family:Arial;padding:24px">
+  <h2>Connect Deriv Demo Account</h2>
+  <p>Enter your Deriv App ID to start secure login.</p>
+  <input id="appId" placeholder="Your Deriv App ID"
+    inputmode="numeric" style="padding:12px;width:90%">
+  <p><button id="login" style="padding:12px">
+    Login with Deriv
+  </button></p>
+  <p id="status"></p>
+
+  <script>
+    const redirectUri =
+      "https://ai-match-prediction.netlify.app/callback.html";
+
+    document.getElementById("login").onclick = async () => {
+      const clientId = document.getElementById("appId").value.trim();
+      const status = document.getElementById("status");
+
+      if (!clientId) {
+        status.textContent = "Enter your Deriv App ID first.";
+        return;
+      }
+
+      try {
+        const bytes = crypto.getRandomValues(new Uint8Array(32));
+        const verifier = Array.from(bytes, b =>
+          b.toString(16).padStart(2, "0")
+        ).join("");
+
+        const digest = await crypto.subtle.digest(
+          "SHA-256",
+          new TextEncoder().encode(verifier)
+        );
+
+        const challenge = btoa(
+          String.fromCharCode(...new Uint8Array(digest))
+        ).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+        const state = Array.from(
+          crypto.getRandomValues(new Uint8Array(16)),
+          b => b.toString(16).padStart(2, "0")
+        ).join("");
+
+        sessionStorage.setItem("deriv_pkce_verifier", verifier);
+        sessionStorage.setItem("deriv_oauth_state", state);
+
+        const url = new URL("https://auth.deriv.com/oauth2/auth");
+        url.searchParams.set("response_type", "code");
+        url.searchParams.set("client_id", clientId);
+        url.searchParams.set("redirect_uri", redirectUri);
+        url.searchParams.set("scope", "trade");
+        url.searchParams.set("state", state);
+        url.searchParams.set("code_challenge", challenge);
+        url.searchParams.set("code_challenge_method", "S256");
+
+        location.href = url.toString();
+      } catch {
+        status.textContent =
+          "Secure login could not start. Open the site in your browser and try again.";
+      }
+    };
+  </script>
+</body>
+</html>
