@@ -320,10 +320,40 @@ socket.current = ws
         )
       }
     }
-    ws.onerror = () =>
-      fail(
-        'Unable to reach Deriv. Check your network or public application ID, then reconnect.',
-      )
+    
+ws.onerror = () => {
+  if (valid()) {
+    setError(
+      'WebSocket connection failed. Check internet access and the deployed build. See the close message below if available.'
+    )
+  }
+}
+```
+
+Then replace your existing `ws.onclose` handler with:
+
+<CodeBlock language="javascript" editable>
+ws.onclose = (event) => {
+  if (!valid()) return
+  if (timer.current) clearTimeout(timer.current)
+
+  const detail =
+    `Connection closed (code ${event.code})` +
+    (event.reason ? `: ${event.reason}` : '.')
+
+  setError((previous) => previous
+    ? `${previous} ${detail}`
+    : detail
+  )
+
+  setStatus((s) => s === 'error' ? s : 'offline')
+  setSignals((s) => s.filter((row) => row.result !== 'Pending'))
+}
+
+    
+        
+
+      
     ws.onclose = () => {
       if (!valid()) return
       if (timer.current) clearTimeout(timer.current)
