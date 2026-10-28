@@ -183,12 +183,17 @@ export function Dashboard() {
     setStatus('connecting')
     setTicks([])
     setDecimals(currentMarket.decimals)
+  
     const ws = new WebSocket(
-  `wss://ws.binaryws.com/websockets/v3?app_id=${encodeURIComponent(appId)}`,
-)
+      `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(appId)}`
+    )
+    socket.current = ws
+
+  
+
     
                                             
-    )
+    
     socket.current = ws
     let precision = currentMarket.decimals
     let lastEpoch = 0
