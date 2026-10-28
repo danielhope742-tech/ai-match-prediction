@@ -198,10 +198,9 @@ export function Dashboard() {
 
     let precision = selected.decimals
     let lastEpoch = 0
-
-    const ws = new WebSocket(
-      `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(appId.trim())}`,
-    )
+const ws = new WebSocket(
+  "wss://ws.derivws.com/websockets/v3?app_id=1089"
+);
 
     socket.current = ws
 
