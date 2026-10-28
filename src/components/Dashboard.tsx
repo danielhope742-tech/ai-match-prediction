@@ -185,9 +185,11 @@ export function Dashboard() {
     setDecimals(currentMarket.decimals)
   
     const ws = new WebSocket(
-      `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(appId)}`
-    )
-    socket.current = ws
+  'wss://ws.derivws.com/websockets/v3'
+)
+socket.current = ws
+  
+
 
   
 
