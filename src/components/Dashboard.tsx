@@ -201,7 +201,7 @@ socket.current = ws
     
                                             
     
-    socket.current = ws
+    
     let precision = currentMarket.decimals
     let lastEpoch = 0
     const valid = () => generation === sequence.current
